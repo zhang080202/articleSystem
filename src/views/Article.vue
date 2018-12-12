@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Table border :columns="columns7" :data="data6" :loading="table_loading"></Table>
+        <Table border :columns="columns" :data="data" :loading="table_loading"></Table>
         <div style="margin: 10px;overflow: hidden">
             <div style="float: right;">
                 <Page show-total show-sizer :total="total" :current="currentPage" @on-change="changePage"></Page>
@@ -17,28 +17,20 @@ export default {
       pageSize: 10,
       pageSizeOpt: [10, 20, 30, 40],
       table_loading: false,
-      columns7: [
+      columns: [
         {
-          title: "Name",
-          key: "name",
-          render: (h, params) => {
-            return h("div", [
-              h("Icon", {
-                props: {
-                  type: "person"
-                }
-              }),
-              h("strong", params.row.name)
-            ]);
-          }
+          title: "文章标题",
+          key: "title",
+          ellipsis: true,
+          maxWidth: 200
         },
         {
-          title: "Age",
-          key: "age"
+          title: "标题图片",
+          key: "accessImage"
         },
         {
-          title: "Address",
-          key: "address"
+          title: "s是否公开",
+          key: "isPrivate"
         },
         {
           title: "Action",
@@ -84,68 +76,7 @@ export default {
           }
         }
       ],
-      data6: [
-        {
-          name: "John Brown",
-          age: 18,
-          address: "New York No. 1 Lake Park"
-        },
-        {
-          name: "Jim Green",
-          age: 24,
-          address: "London No. 1 Lake Park"
-        },
-        {
-          name: "Joe Black",
-          age: 30,
-          address: "Sydney No. 1 Lake Park"
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park"
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park"
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park"
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park"
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park"
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park"
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park"
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park"
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park"
-        }
-      ]
+      data: []
     };
   },
   methods: {
@@ -167,11 +98,12 @@ export default {
     getArticlerList() {
       this.table_loading = true;
       this.$http.get(
-          "/article/v1/getArticlerList/" + this.currentPage + "/" + this.pageSize
+          "/article/v1/getArticlerListAll/" + this.currentPage + "/" + this.pageSize
         )
         .then(({ data }) => {
           console.log("--------------->", data);
           this.total = data.data.total;
+          this.data = data.data.records;
           this.table_loading = false;  
         })
         .catch(err => {
