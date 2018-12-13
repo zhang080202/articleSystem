@@ -19,6 +19,12 @@ export default {
       table_loading: false,
       columns: [
         {
+          title: "序号",
+          type: "index",
+          align: "center",
+          maxWidth: 80
+        },
+        {
           title: "文章标题",
           key: "title",
           ellipsis: true,
@@ -26,11 +32,49 @@ export default {
         },
         {
           title: "标题图片",
-          key: "accessImage"
+          key: "accessImage",
+          maxWidth: 200,
+          maxHeight: 200,
+          render: (h, params) => {
+            return h("img", {
+              attrs: {
+                src: params.row.accessImage
+              },
+              style: {
+                width: '100%',
+                height: '100%'
+               }
+            });
+          }
         },
         {
-          title: "s是否公开",
-          key: "isPrivate"
+          title: "是否公开",
+          key: "isPrivate",
+          maxWidth: 150,
+          align: "center",
+          render: (h, params) => {
+            return h("Tag", {
+              props: {
+                color: params.row.isPrivate ? "green" : "blue",
+                type: "border",
+                fade: true
+              },
+            }, params.row.isPrivate ? "私有文章" : "公开文章");
+          }
+        },
+        {
+          title: "文章类型",
+          key: "articleType",
+          // maxWidth: 200,
+          // render: (h, params) => {
+          //   return h("Tag", {
+          //     props: {
+          //       color: params.row.isPrivate ? "green" : "blue",
+          //       type: "border",
+          //       fade: true
+          //     },
+          //   }, params.row.isPrivate ? "私有文章" : "公开文章");
+          // }
         },
         {
           title: "Action",
