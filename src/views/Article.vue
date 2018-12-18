@@ -76,202 +76,253 @@
 </style>
 
 <script>
-export default {
-  data() {
-    return {
-      searchItem: {
-        title: "",
-        isPrivate: null,
-        status: null,
-        startDate: null,
-        endDate: null
-      },
-      total: 0,
-      currentPage: 1,
-      pageSize: 10,
-      pageSizeOpt: [10, 20, 30, 40],
-      table_loading: false,
-      columns: [
-        {
-          title: "序号",
-          type: "index",
-          align: "center",
-          maxWidth: 80
+  import veArticle from './VeArticle.vue'
+  export default {
+    data() {
+      return {
+        searchItem: {
+          title: "",
+          isPrivate: null,
+          status: null,
+          startDate: null,
+          endDate: null,
+          detail: null
         },
-        {
-          title: "文章标题",
-          key: "title",
-          ellipsis: true,
-          align: "center"
-        },
-        {
-          title: "标题图片",
-          key: "accessImage",
-          maxWidth: 200,
-          maxHeight: 200,
-          render: (h, params) => {
-            return h("img", {
-              attrs: {
-                src: params.row.accessImage
-              },
-              style: {
-                width: "100%",
-                height: "100%"
+        total: 0,
+        currentPage: 1,
+        pageSize: 10,
+        pageSizeOpt: [10, 20, 30, 40],
+        table_loading: false,
+        columns: [
+          {
+            title: "序号",
+            type: "index",
+            align: "center",
+            maxWidth: 80
+          },
+          {
+            title: "文章标题",
+            key: "title",
+            ellipsis: true,
+            align: "center"
+          },
+          {
+            title: "标题图片",
+            key: "accessImage",
+            maxWidth: 200,
+            maxHeight: 200,
+            render: (h, params) => {
+              return h("img", {
+                attrs: {
+                  src: params.row.accessImage
+                },
+                style: {
+                  width: "100%",
+                  height: "100%"
+                }
+              });
+            }
+          },
+          {
+            title: "是否公开",
+            key: "isPrivate",
+            maxWidth: 150,
+            align: "center",
+            render: (h, params) => {
+              return h(
+                "Tag",
+                {
+                  props: {
+                    color: params.row.isPrivate ? "green" : "blue",
+                    type: "border",
+                    fade: true
+                  }
+                },
+                params.row.isPrivate ? "私有文章" : "公开文章"
+              );
+            }
+          },
+          {
+            title: "文章类型",
+            key: "remark",
+            align: "center",
+            maxWidth: 150
+          },
+          {
+            title: "作者",
+            key: "userName",
+            align: "center",
+            maxWidth: 150
+          },
+          {
+            title: "创建时间",
+            key: "createTime",
+            align: "center",
+            maxWidth: 150
+          },
+          {
+            title: "审核时间",
+            key: "passTime",
+            align: "center",
+            maxWidth: 150
+          },
+          {
+            title: "审核状态",
+            key: "statusValue",
+            maxWidth: 150,
+            align: "center"
+          },
+          {
+            title: "操作",
+            key: "action",
+            width: 150,
+            align: "center",
+            render: (h, params) => {
+              return h("div", [
+                h(
+                  "Button",
+                  {
+                    props: {
+                      type: "primary",
+                      size: "small"
+                    },
+                    style: {
+                      marginRight: "5px"
+                    },
+                    on: {
+                      click: () => {
+                        this.show(params.row);
+                      }
+                    }
+                  },
+                  "查看"
+                ),
+                h(
+                  "Button",
+                  {
+                    props: {
+                      type: "error",
+                      size: "small"
+                    },
+                    on: {
+                      click: () => {
+                        this.remove(params.index);
+                      }
+                    }
+                  },
+                  "删除"
+                )
+              ]);
+            }
+          }
+        ],
+        data: [],
+        detail: {}
+      };
+    },
+    methods: {
+      async show(data) {
+        const _this = this;
+        await _this.getArticlerById(data);
+        _this.$Modal.confirm({
+          title: "文章详情",
+          closable: true,
+          cancelText: "取消",
+          okText: "保存",
+          width: 1000,
+          loading: true,
+          render: h => {
+            return h(veArticle, {
+              props: {
+                value: _this.detail
               }
             });
+          },
+          onOk: () => {
+            console.log(_this.detail)
+            this.saveArticle(_this.detail)
           }
-        },
-        {
-          title: "是否公开",
-          key: "isPrivate",
-          maxWidth: 150,
-          align: "center",
-          render: (h, params) => {
-            return h(
-              "Tag",
-              {
-                props: {
-                  color: params.row.isPrivate ? "green" : "blue",
-                  type: "border",
-                  fade: true
-                }
-              },
-              params.row.isPrivate ? "私有文章" : "公开文章"
-            );
-          }
-        },
-        {
-          title: "文章类型",
-          key: "remark",
-          align: "center",
-          maxWidth: 150
-        },
-        {
-          title: "作者",
-          key: "userName",
-          align: "center",
-          maxWidth: 150
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-          align: "center",
-          maxWidth: 150
-        },
-        {
-          title: "审核时间",
-          key: "passTime",
-          align: "center",
-          maxWidth: 150
-        },
-        {
-          title: "审核状态",
-          key: "statusValue",
-          maxWidth: 150,
-          align: "center"
-        },
-        {
-          title: "操作",
-          key: "action",
-          width: 150,
-          align: "center",
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "primary",
-                    size: "small"
-                  },
-                  style: {
-                    marginRight: "5px"
-                  },
-                  on: {
-                    click: () => {
-                      this.show(params.row);
-                    }
-                  }
-                },
-                "查看"
-              ),
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "error",
-                    size: "small"
-                  },
-                  on: {
-                    click: () => {
-                      this.remove(params.index);
-                    }
-                  }
-                },
-                "删除"
-              )
-            ]);
-          }
-        }
-      ],
-      data: []
-    };
-  },
-  methods: {
-    show(data) {
-      this.$Modal.info({
-        title: "文章详情",
-        closable: true,
-        // content: `Name：${this.data[index].name}<br>Age：${
-        //   this.data[index].age
-        // }<br>Address：${this.data[index].address}`
-        render: h => {
-          return h("div", data.title);
-        }
-      });
-    },
-    remove(index) {
-      this.data.splice(index, 1);
-    },
-    getStartDate(startDate) {
-      this.searchItem.startDate = startDate + " 00:00:00";
-    },
-    getEndDate(endDate) {
-      this.searchItem.endDate = endDate + " 23:59:59";
-    },
-    handleSearch(params) {
-      this.getArticlerList();
-    },
-    //页码变化
-    changePage(page) {
-      this.currentPage = page;
-      this.getArticlerList();
-    },
-    //每页显示条数变化
-    changePageSize(page) {
-      this.pageSize = page;
-      this.getArticlerList();
-    },
-    //获取文章列表
-    getArticlerList() {
-      this.table_loading = true;
-      this.$http.get(
-          "/article/v1/getArticlerListAll/" + this.currentPage + "/" + this.pageSize + "/" + JSON.stringify(this.searchItem)
-        )
-        .then(({ data }) => {
-          console.log("--------------->", data);
-          this.total = data.data.total;
-          this.data = data.data.records;
-          this.table_loading = false;
-        })
-        .catch(err => {
-          console.log(err);
-          this.table_loading = false;
         });
+      },
+      remove(index) {
+        this.data.splice(index, 1);
+      },
+      getStartDate(startDate) {
+        this.searchItem.startDate = startDate + " 00:00:00";
+      },
+      getEndDate(endDate) {
+        this.searchItem.endDate = endDate + " 23:59:59";
+      },
+      handleSearch(params) {
+        this.getArticlerList();
+      },
+      //页码变化
+      changePage(page) {
+        this.currentPage = page;
+        this.getArticlerList();
+      },
+      //每页显示条数变化
+      changePageSize(page) {
+        this.pageSize = page;
+        this.getArticlerList();
+      },
+      //获取文章列表
+      getArticlerList() {
+        this.table_loading = true;
+        this.$http.get(
+            "/article/v1/getArticlerListAll/" + this.currentPage + "/" + this.pageSize + "/" + JSON.stringify(this.searchItem)
+          )
+          .then(({ data }) => {
+            console.log("-------getArticlerListAll-------->", data);
+            this.total = data.data.total;
+            this.data = data.data.records;
+            this.table_loading = false;
+          })
+          .catch(err => {
+            console.log(err);
+            this.table_loading = false;
+            this.$Message.error(err);
+        });
+      },
+      //获取文章详情
+      getArticlerById(data) {
+        this.table_loading = true;
+        return new Promise(resolve => {
+          this.$http.get(
+            "/article/v1/getArticlerById/" + data.articleId + "/" + data.createUser
+          )
+          .then(({ data }) => {
+            console.log("--------getArticlerById------->", data);
+            this.detail = data.data;
+            this.table_loading = false;
+            resolve();
+          })
+          .catch(err => {
+            console.log(err);
+            this.table_loading = false;
+            this.$Message.error(err);
+          });
+        })
+      },
+      saveArticle(params) {
+        return new Promise(resolve => {
+          this.$http.post("/article/v1/updateArticle", params.detail)
+          .then(({ data }) => {
+            this.$Modal.remove();
+            this.$Message.success('保存成功');
+            this.getArticlerList();
+            resolve();
+          })
+          .catch(err => {
+            console.log(err);
+            this.$Modal.remove();
+            this.$Message.error(err);
+          });
+        })
+      }
+    },
+    mounted() {
+      this.getArticlerList();
     }
-  },
-  mounted() {
-    this.getArticlerList();
-  }
-};
+  };
 </script>

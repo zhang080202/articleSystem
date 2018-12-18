@@ -7,7 +7,10 @@ import './login.js'
 import './ui.js' 
 import axios from 'axios'
 import service from './utils/fetch'
+import preview from 'vue-photo-preview'
+import 'vue-photo-preview/dist/skin.css'
 
+Vue.use(preview)
 Vue.prototype.$http = service
 Vue.prototype.$axios = axios
 
