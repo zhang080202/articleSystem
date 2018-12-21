@@ -58,6 +58,21 @@
                 </Col>
             </Row>
             <Row>
+                <Col span="10">
+                    <FormItem label="文章类型">
+                        <p>{{saveItem.detail.typeValue}}</p>
+                    </FormItem>
+                </Col>
+                <Col span="10">
+                    <FormItem label="是否编辑">
+                        <RadioGroup v-model="saveItem.detail.isEdit" >
+                            <Radio label="1">可编辑</Radio>
+                            <Radio label="0">不可编辑</Radio>
+                        </RadioGroup>
+                    </FormItem>
+                </Col>
+            </Row>
+            <Row>
                 <Col span="6">
                     <FormItem label="标题图片">
                         <Upload
@@ -133,8 +148,10 @@ import { VueTinymce , TinymceSetting } from '@packy-tang/vue-tinymce';
         },
         created() {
             this.$nextTick(() => {
+                // debugger;
                 this.saveItem = this.value;
                 this.saveItem.detail.status = this.saveItem.detail.status.toString();
+                // this.saveItem.detail.isEdit = this.saveItem.detail.isEdit.toString();
                 // this.image.name = this.value.detail.image;
                 // this.image.url = this.value.detail.accessImage;
                 // this.content = this.value.detail.content;

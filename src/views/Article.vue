@@ -5,7 +5,7 @@
           <Row type="flex" justify="start">
             <Col span="4">
                 <FormItem label="文章标题">
-                  <Input v-model="searchItem.title" placeholder="请输入文章标题" ></Input>
+                  <Input v-model="searchItem.title" placeholder="请输入文章标题" clearable  ></Input>
                 </FormItem>
             </Col>
             <Col span="4">
@@ -109,6 +109,7 @@
           {
             title: "标题图片",
             key: "accessImage",
+            align: "center",
             maxWidth: 200,
             maxHeight: 200,
             render: (h, params) => {
@@ -206,7 +207,7 @@
                     },
                     on: {
                       click: () => {
-                        this.remove(params.index);
+                        this.remove(params.row);
                       }
                     }
                   },
@@ -226,7 +227,6 @@
         await _this.getArticlerById(data);
         _this.$Modal.confirm({
           title: "文章详情",
-          closable: true,
           cancelText: "取消",
           okText: "保存",
           width: 1000,
@@ -244,8 +244,8 @@
           }
         });
       },
-      remove(index) {
-        this.data.splice(index, 1);
+      remove(params) {
+        this.deleteArticle(params.articleId);
       },
       getStartDate(startDate) {
         this.searchItem.startDate = startDate + " 00:00:00";
@@ -289,7 +289,7 @@
         this.table_loading = true;
         return new Promise(resolve => {
           this.$http.get(
-            "/article/v1/getArticlerById/" + data.articleId + "/" + data.createUser
+            "/article/v1/getArticlerById/" + data.articleId + "/" + data.createUser + "/0"
           )
           .then(({ data }) => {
             console.log("--------getArticlerById------->", data);
@@ -316,6 +316,21 @@
           .catch(err => {
             console.log(err);
             this.$Modal.remove();
+            this.$Message.error(err);
+          });
+        })
+      },
+      deleteArticle(params) {
+        this.table_loading = true;
+        return new Promise(resolve => {
+          this.$http.get("/article/v1/deleteArticle/" + params)
+          .then(({ data }) => {
+            this.getArticlerList();
+            this.$Message.success('删除成功');
+            resolve();
+          })
+          .catch(err => {
+            console.log(err);
             this.$Message.error(err);
           });
         })
